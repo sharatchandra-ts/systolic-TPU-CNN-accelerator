@@ -4,67 +4,72 @@ module mac_unit_tb;
 
     // 1. Parameters & Signals
     parameter DATA_WIDTH = 8;
-    parameter ACC_WIDTH = 32;
+    parameter ACC_WIDTH  = 32;
 
-    logic clk;
-    logic rst_n;
-    logic signed [DATA_WIDTH-1:0] a_in;
-    logic signed [DATA_WIDTH-1:0] b_in;
+    logic clk, rst_n;
+    logic clear_in, clear_out;
+    logic valid_in, valid_out;
+    
+    logic signed [DATA_WIDTH-1:0] a_in, a_out;
+    logic signed [DATA_WIDTH-1:0] b_in, b_out;
     logic signed [ACC_WIDTH-1:0]  c_in;
     logic signed [ACC_WIDTH-1:0]  acc_out;
 
-    // 2. Instantiate the Device Under Test (DUT)
-    // This connects your testbench wires to your MAC module
+    // 2. Instantiate DUT (Device Under Test)
     mac_unit #(
         .DATA_WIDTH(DATA_WIDTH),
-        .ACC_WIDTH(ACC_WIDTH)
-    ) dut (
-        .clk(clk),
-        .reset(rst_n),
-        .a_in(a_in),
-        .b_in(b_in),
-        .c_in(c_in),
-        .acc_out(acc_out)
-    );
+        .ACC_WIDTH (ACC_WIDTH)
+    ) dut (.*); // Use .* to connect signals with matching names
 
-    // 3. Clock Generation (100MHz = 10ns period)
+    // 3. Clock Generation
     initial begin
         clk = 0;
         forever #5 clk = ~clk;
     end
 
-    // 4. The Test Script
+    // 4. Test Script
     initial begin
         $dumpfile("dump.vcd");
         $dumpvars(0, mac_unit_tb);
 
-        // Initialize Inputs
+        // Reset Sequence
         a_in = 0; b_in = 0; c_in = 0;
-        rst_n = 0; // Hold reset
+        clear_in = 0; valid_in = 0;
+        rst_n = 0;
+        #15 rst_n = 1;
 
-        // Wait 20ns, then release reset
-        #20 rst_n = 1;
+        // --- Test 1: Math Verification ---
+        // Calculate: (3 * 4) + 10 = 22
+        @(posedge clk);
+        a_in = 8'sd3; b_in = 8'sd4; c_in = 32'sd10; valid_in = 1;
 
-        // Test Case 1: Simple Positive Multiplication
-        // (2 * 3) + 0 = 6
-        @(posedge clk); // Wait for a clock edge
-        a_in = 8'd2; b_in = 8'd3; c_in = 32'd0;
+        @(posedge clk);
+        valid_in = 0;
+        $display("Math Test: acc_out = %d (Expected 22)", acc_out);
+
+        // --- Test 2: Pipeline Propagation ---
+        // Verify that a_in and b_in take 1 cycle to reach a_out and b_out
+        @(posedge clk);
+        a_in = 8'sd77; b_in = 8'sd88; 
         
-        // Test Case 2: Accumulation
-        // (4 * 5) + 6 = 26
+        // At this specific moment, a_out should NOT be 77 yet.
+        $display("Pipeline Check (Same Cycle): a_out = %d (Expected 3)", a_out);
+
         @(posedge clk);
-        a_in = 8'd4; b_in = 8'd5; c_in = acc_out; // Use previous result
+        // Now a_out should be 77
+        $display("Pipeline Check (Next Cycle): a_out = %d (Expected 77)", a_out);
 
-        // Test Case 3: Signed (Negative) Math
-        // (-2 * 3) + 26 = 20
+        // --- Test 3: Clear Logic ---
         @(posedge clk);
-        a_in = -8'd2; b_in = 8'd3; c_in = acc_out;
+        clear_in = 1;
+        
+        @(posedge clk);
+        clear_in = 0;
+        $display("Clear Test: acc_out = %d (Expected 0)", acc_out);
+        $display("Clear Prop: clear_out = %b (Expected 1)", clear_out);
 
-        // Observe results for a few more cycles
-        repeat(5) @(posedge clk);
-
-        $display("Test Complete. Final Result: %d", acc_out);
-        $finish; // Stop the simulation
+        repeat(3) @(posedge clk);
+        $finish;
     end
 
 endmodule
