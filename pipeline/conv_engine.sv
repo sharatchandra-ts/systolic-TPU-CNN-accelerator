@@ -40,7 +40,6 @@ module conv_engine #(
     logic                           im2col_valid;
     
     logic                           im2col_valid_d1;
-    logic                           im2col_valid_d2;
     logic                           feeder_valid_out; 
 
     logic                           im2col_enable;
@@ -96,10 +95,8 @@ module conv_engine #(
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             im2col_valid_d1 <= 1'b0;
-            im2col_valid_d2 <= 1'b0;
         end else begin
             im2col_valid_d1 <= im2col_valid;
-            im2col_valid_d2 <= im2col_valid_d1;
         end
     end
 

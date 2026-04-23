@@ -42,16 +42,18 @@ module conv_engine_tb;
     // MONITOR TASK: Print Loaded Weights
     // ---------------------------------------------------------
     task automatic print_loaded_weights();
-        $display("\n--- [STAGE 1] LOADED WEIGHT MATRIX (from BRAM) ---");
-        for (int k = 0; k < COLS; k++) begin
-            string row_str = $sformatf("Kernel %0d: ", k);
-            for (int r = 0; r < ROWS; r++) begin
-                // Accessing the weight BRAM memory directly via hierarchical path
-                row_str = {row_str, $sformatf("%4d ", uut.u_weight_bram.mem[k*ROWS + r])};
-            end
-            $display("%s", row_str);
-        end
-        $display("--------------------------------------------------\n");
+        $display("\n--- [STAGE 1] LOADED WEIGHT MAP (Systolic Array PE w_reg) ---");
+        $display("         K0       K1       K2       K3");
+        $display("Row 0: | %4d | %4d | %4d | %4d |", uut.u_array.row_gen[0].column_gen[0].pe_inst.w_reg, uut.u_array.row_gen[0].column_gen[1].pe_inst.w_reg, uut.u_array.row_gen[0].column_gen[2].pe_inst.w_reg, uut.u_array.row_gen[0].column_gen[3].pe_inst.w_reg);
+        $display("Row 1: | %4d | %4d | %4d | %4d |", uut.u_array.row_gen[1].column_gen[0].pe_inst.w_reg, uut.u_array.row_gen[1].column_gen[1].pe_inst.w_reg, uut.u_array.row_gen[1].column_gen[2].pe_inst.w_reg, uut.u_array.row_gen[1].column_gen[3].pe_inst.w_reg);
+        $display("Row 2: | %4d | %4d | %4d | %4d |", uut.u_array.row_gen[2].column_gen[0].pe_inst.w_reg, uut.u_array.row_gen[2].column_gen[1].pe_inst.w_reg, uut.u_array.row_gen[2].column_gen[2].pe_inst.w_reg, uut.u_array.row_gen[2].column_gen[3].pe_inst.w_reg);
+        $display("Row 3: | %4d | %4d | %4d | %4d |", uut.u_array.row_gen[3].column_gen[0].pe_inst.w_reg, uut.u_array.row_gen[3].column_gen[1].pe_inst.w_reg, uut.u_array.row_gen[3].column_gen[2].pe_inst.w_reg, uut.u_array.row_gen[3].column_gen[3].pe_inst.w_reg);
+        $display("Row 4: | %4d | %4d | %4d | %4d |", uut.u_array.row_gen[4].column_gen[0].pe_inst.w_reg, uut.u_array.row_gen[4].column_gen[1].pe_inst.w_reg, uut.u_array.row_gen[4].column_gen[2].pe_inst.w_reg, uut.u_array.row_gen[4].column_gen[3].pe_inst.w_reg);
+        $display("Row 5: | %4d | %4d | %4d | %4d |", uut.u_array.row_gen[5].column_gen[0].pe_inst.w_reg, uut.u_array.row_gen[5].column_gen[1].pe_inst.w_reg, uut.u_array.row_gen[5].column_gen[2].pe_inst.w_reg, uut.u_array.row_gen[5].column_gen[3].pe_inst.w_reg);
+        $display("Row 6: | %4d | %4d | %4d | %4d |", uut.u_array.row_gen[6].column_gen[0].pe_inst.w_reg, uut.u_array.row_gen[6].column_gen[1].pe_inst.w_reg, uut.u_array.row_gen[6].column_gen[2].pe_inst.w_reg, uut.u_array.row_gen[6].column_gen[3].pe_inst.w_reg);
+        $display("Row 7: | %4d | %4d | %4d | %4d |", uut.u_array.row_gen[7].column_gen[0].pe_inst.w_reg, uut.u_array.row_gen[7].column_gen[1].pe_inst.w_reg, uut.u_array.row_gen[7].column_gen[2].pe_inst.w_reg, uut.u_array.row_gen[7].column_gen[3].pe_inst.w_reg);
+        $display("Row 8: | %4d | %4d | %4d | %4d |", uut.u_array.row_gen[8].column_gen[0].pe_inst.w_reg, uut.u_array.row_gen[8].column_gen[1].pe_inst.w_reg, uut.u_array.row_gen[8].column_gen[2].pe_inst.w_reg, uut.u_array.row_gen[8].column_gen[3].pe_inst.w_reg);
+        $display("------------------------------------------------------------\n");
     endtask
 
     // ---------------------------------------------------------
