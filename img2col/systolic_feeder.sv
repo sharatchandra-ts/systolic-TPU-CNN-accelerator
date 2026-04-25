@@ -8,7 +8,7 @@ module systolic_feeder #(
     // CHANGED: Input data can be signed
     input  logic signed [DATA_WIDTH-1:0]  img_data_in,
     input  logic                          data_valid_in, 
-    output logic                          data_valid_out,
+    output logic                          data_valid_out [ROWS],
     // CHANGED: Output array must be signed
     output logic signed [ROWS-1:0][DATA_WIDTH-1:0] systolic_out
 );
@@ -61,8 +61,8 @@ module systolic_feeder #(
     end
 
     // --- 3. Skewing Logic & Valid Generation ---
-    logic [ROWS-1:0] pipe_valid;
-
+    logic pipe_valid [ROWS];
+    
     generate
         for (genvar r = 0; r < ROWS; r++) begin : skew_row
             // CHANGED: Pipeline registers must be signed to prevent unsigned extension
@@ -91,6 +91,6 @@ module systolic_feeder #(
         end
     endgenerate
 
-    assign data_valid_out = |pipe_valid;
-
+    assign data_valid_out = pipe_valid;
+    
 endmodule

@@ -25,7 +25,7 @@ module conv_engine #(
     // Final Output (from Systolic Array)
     // CHANGED: Explicitly signed output array
     output logic signed [COLS-1:0][(2*DATA_WIDTH)+4:0] conv_out, 
-    output logic                                       out_valid
+    output logic                                       out_valid [COLS]
 );
 
     localparam DEPTH     = ROWS * COLS;
@@ -40,7 +40,7 @@ module conv_engine #(
     logic                           im2col_valid;
     
     logic                           im2col_valid_d1;
-    logic                           feeder_valid_out; 
+    logic                           feeder_valid_out [ROWS]; 
 
     logic                           im2col_enable;
     logic                           weight_loader_valid;
@@ -83,12 +83,13 @@ module conv_engine #(
         end
 
         for (int j = 0; j < COLS; j++) begin
-            valid_in_array[j] = (state == COMPUTE) ? feeder_valid_out : (weight_valid && (state == LOAD_WGHT));
+            valid_in_array[j] = (state == COMPUTE) ? 1'b1 : (weight_valid && (state == LOAD_WGHT));
             clear_in_array[j] = (state == DONE);
             conv_out[j]       = result_array[j];
+            out_valid[j] = valid_out_array[j];
         end
 
-        out_valid = valid_out_array[0];
+        // out_valid = valid_out_array[0];
     end
 
     // --- 3. BRAM Read Latency Compensation ---
@@ -133,7 +134,7 @@ module conv_engine #(
     ) u_array (
         .clk(clk), .rst_n(rst_n), .load_en(load_en_reg),
         .a_in(a_in_array), .w_in(w_in), .result(result_array),
-        .valid_in(valid_in_array), .clear_in(clear_in_array),
+        .a_valid(feeder_valid_out), .w_valid(valid_in_array), .clear_in(clear_in_array),
         .valid_out_final(valid_out_array)
     );
 

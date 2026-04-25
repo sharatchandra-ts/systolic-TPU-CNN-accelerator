@@ -10,8 +10,14 @@ module mac_unit #(
 	input logic clear_in,
 	output logic clear_out,
 	// To check if the input data is ready to be sent to the MAC
-	input logic valid_in,
-	output logic valid_out,
+	input logic w_valid_in,
+	input logic a_valid_in,
+	input logic acc_valid_in,
+
+
+	output logic w_valid_out,
+	output logic a_valid_out,
+	output logic acc_valid_out,
 	// First multiplication input
 	input logic signed [DATA_WIDTH-1:0] a_in,
 	output logic signed [DATA_WIDTH-1:0] a_out,
@@ -35,10 +41,12 @@ module mac_unit #(
 	always_ff @(posedge clk or negedge rst_n) begin
 		if (!rst_n) begin
 			clear_out <= 1'b0;
-			valid_out <= 1'b0;
 			a_out <= '0;
 			w_out <= '0;
 			acc_out <= '0;
+			acc_valid_out <= 1'b0;
+			w_valid_out <= 1'b0;
+			a_valid_out <= 1'b0;
 
 		end else begin
 			if (load_en) begin
@@ -53,11 +61,14 @@ module mac_unit #(
 
 			// Data always moves to the neighbor every cycle
 			clear_out <= clear_in;
-			valid_out <= valid_in;
+			a_valid_out <= a_valid_in;
+			acc_valid_out <= acc_valid_in || a_valid_in;
+			w_valid_out <= w_valid_in;
 			a_out <= a_in;
 
 			if (clear_in) acc_out <= '0;
-			else if (valid_in) acc_out <= acc_in + ACC_WIDTH'(product);
+            else if (a_valid_in) acc_out <= acc_in + ACC_WIDTH'(product);
+            else acc_out <= acc_in;
 	    end
 	end
 endmodule
