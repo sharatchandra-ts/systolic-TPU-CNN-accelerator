@@ -15,12 +15,14 @@ module bias_relu #(
 
     always_comb begin
         for (int k = 0; k < COLS; k++) begin
-            biased[k] = conv_out[k] + bias_mem[k];
-            if (biased[k] < 0) 
-                relu_out[k] = '0;
-            else 
-                relu_out[k] = biased[k];
+            biased[k]    = '0;
+            relu_out[k]  = '0;
             valid_out[k] = valid_in[k];
+            
+            if (valid_in[k]) begin
+                biased[k]   = conv_out[k] + bias_mem[k];
+                relu_out[k] = (biased[k] < 0) ? '0 : biased[k];
+            end
         end
     end
 
